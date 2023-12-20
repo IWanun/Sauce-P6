@@ -115,6 +115,8 @@ function createSauces(req, res) {
     .catch((err) => res.status(500).send(err))
 }
 
+
+
 function likeSauce(req, res) {
   const { like, userId } = req.body
   if (![1, -1, 0].includes(like)) return res.status(403).send({ message: "Invalid like value" })
@@ -133,6 +135,7 @@ function updateVote(product, like, userId, res) {
 
 function resetVote(product, userId, res) {
   const { usersLiked, usersDisliked } = product
+  
   if ([usersLiked, usersDisliked].every((arr) => arr.includes(userId)))
     return Promise.reject("User seems to have voted both ways")
 

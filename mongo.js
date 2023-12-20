@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require("mongoose-unique-validator")
-const uri = "mongodb+srv://Hamad94:4liGrGv4BVxE3rH8@projet-6.dccvhpb.mongodb.net/?retryWrites=true&w=majority";
+
+const password = process.env.DB_PASSWORD
+const username = process.env.DB_USER
+const uri = `mongodb+srv://${username}:${password}@projet-6.dccvhpb.mongodb.net/?retryWrites=true&w=majority`;
+
 
 
 mongoose
