@@ -1,17 +1,30 @@
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
 
-function authenticateUser(req, res, next){
-    console.log("authenticate user")
-    const header = req.header("Authorization")
-    if (header == null) return res.status(403).send({message: "Invalid"})
-    const token = header.split(" ")[1]
-    if (token == null) return res.status(403).send({message: "Token cannot be null"})
+// Middleware pour authentifier l'utilisateur
+function authenticateUser(req, res, next) {
+    console.log("authenticate user");
 
-        jwt.verify(token, process.env.JWT_PASSWORD, (err,decoded)=> {
-        if(err) return res.status(403).send({message: "Token invalid" + err})
-        console.log("Le Token est bien valide, nous pouvons donc continué")
-        next()
-    })
+    // Récupération de l'en-tête "Authorization" de la requête
+    const header = req.header("Authorization");
+
+    // Vérification si l'en-tête est présent
+    if (header == null) return res.status(403).send({ message: "Invalid" });
+
+    // Extraction du token 
+    const token = header.split(" ")[1];
+
+    // Vérification si le token est présent
+    if (token == null) return res.status(403).send({ message: "Token cannot be null" });
+
+    // Vérification et décryptage du token JWT
+    jwt.verify(token, process.env.JWT_PASSWORD, (err, decoded) => {
+        // Si une erreur survient, le token est invalide
+        if (err) return res.status(403).send({ message: "Token invalid" + err });
+
+        // Si le token est valide, affichage d'un message et appel de la fonction suivante (next)
+        console.log("Le Token est bien valide, nous pouvons donc continuer");
+        next();
+    });
 }
 
-module.exports = {authenticateUser}
+module.exports = { authenticateUser };

@@ -1,17 +1,24 @@
-const multer = require("multer")
+const multer = require("multer");
 
+// Configuration du stockage pour multer
 const storage = multer.diskStorage({
-    destination: "images/",
-     filename: function (req, file, cb) {
-       cb(null, makeFileName(req, file))
-     }
-   })
-   function makeFileName(req, file){
-    const fileName = `${Date.now()}-${file.originalname}`
-    file.fileName = fileName
-    return fileName 
-  }
+    destination: "images/",  // Le dossier où les fichiers seront sauvegardés
+    filename: function (req, file, cb) {
+        // Utilisation de la fonction makeFileName pour générer le nom de fichier
+        cb(null, makeFileName(req, file));
+    }
+});
 
-const upload = multer({ storage: storage})
+// Fonction pour générer le nom de fichier
+function makeFileName(req, file) {
+    const fileName = `${Date.now()}-${file.originalname}`;
+    // Ajout du nom de fichier à l'objet file pour une utilisation ultérieure si nécessaire
+    file.fileName = fileName;
+    return fileName;
+}
 
-module.exports = {upload}
+// Configuration de l'upload avec multer en utilisant le stockage défini
+const upload = multer({ storage: storage });
+
+// Exportation du middleware d'upload configuré
+module.exports = { upload };

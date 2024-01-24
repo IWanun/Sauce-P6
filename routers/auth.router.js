@@ -1,10 +1,15 @@
-const {createUser, logUser} = require("../controllers/user")
+// Importation des fonctions createUser et logUser depuis le fichier controllers/user
+const { createUser, logUser } = require("../controllers/user");
 
-const express = require ("express")
-const authRouter = express.Router()
+// Importation du module express
+const express = require("express");
 
-authRouter.post("/signup", createUser)
-authRouter.post("/login", logUser)
+// Création d'un routeur express
+const authRouter = express.Router();
 
+// Définition des routes avec les fonctions correspondantes
+authRouter.post("/signup", createUser);  // Route pour l'inscription d'un utilisateur
+authRouter.post("/login", logUser);      // Route pour la connexion d'un utilisateur
 
-module.exports = {authRouter}
+// Exportation du routeur
+module.exports = { authRouter };
