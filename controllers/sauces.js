@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema({
   description: String,
   mainPepper: String,
   imageUrl: String,
-  heat: { type: Number, min: 1, max: 5 },
+  heat: { type: Number, min: 1, max: 10 },
   likes: Number,
   dislikes: Number,
   usersLiked: [String],
@@ -43,34 +43,54 @@ function getSauceById(req, res) {
 
 // Fonction pour supprimer une sauce par ID
 function deleteSauce(req, res) {
-  // Récupération de l'ID de la sauce depuis les paramètres de la requête
-  const { id } = req.params;
-  // Recherche et suppression de la sauce par ID dans la base de données
-  Product.findByIdAndDelete(id)
-    .then(product => sendClientResponse(product, res)) // Envoie une réponse au client avec la sauce supprimée
-    .then((product) => deleteImage(product)) // Supprime l'image associée à la sauce (le fichier)
-    .then((res) => console.log("FILE DELETED", res)) // Affiche un message dans la console une fois le fichier supprimé
-    .catch(console.error); // Gestion des erreurs et envoi d'une réponse d'erreur au client si nécessaire
-}
+  const { params: { id } } = req;
+  const userIdFromRequest = req.body.userId;
 
+  // Vérifier si l'utilisateur est le créateur de la sauce
+  getSauce(req, res)
+    .then((product) => {
+      if (product.userId !== userIdFromRequest) {
+        return res.status(403).send({ message: "Vous n'avez pas le droit de supprimer cette sauce." });
+      }
+
+      return Product.findByIdAndDelete(id)
+        .then(product => sendClientResponse(product, res))
+        .then((product) => deleteImage(product))
+        .then((res) => console.log("FILE DELETED", res))
+        .catch(console.error);
+    })
+    .catch(console.error);
+}
 
 // Fonction pour modifier une sauce par ID
 function modifySauces(req, res) {
-  // Récupération de l'ID de la sauce depuis les paramètres de la requête
   const { params: { id } } = req;
+  const userIdFromRequest = req.body.userId;
 
-  // Vérification si une nouvelle image a été ajoutée à la requête
-  const hasNewImage = req.file != null;
+  // Vérifier si l'utilisateur est le créateur de la sauce
+  getSauce(req, res)
+    .then((product) => {
+      if (product.userId !== userIdFromRequest) {
+        return res.status(403).send({ message: "Vous n'avez pas le droit de modifier cette sauce." });
+      }
 
-  // Construction du payload (les données à mettre à jour) en fonction de la présence d'une nouvelle image
-  const payload = makePayload(hasNewImage, req);
+      const hasNewImage = req.file != null;
+      const payload = makePayload(hasNewImage, req);
 
-  // Mise à jour de la sauce par ID dans la base de données
-  Product.findByIdAndUpdate(id, payload)
-    .then((dbResponse) => sendClientResponse(dbResponse, res)) 
-    .then((product) => deleteImage(product)) 
-    .then((res) => console.log("FILE DELETED", res)) 
-    .catch(err => console.error("PROBLEME UPDATING", err)); 
+      return Product.findByIdAndUpdate(id, payload)
+        .then((dbResponse) => sendClientResponse(dbResponse, res))
+        .then((product) => deleteImage(product))
+        .then((res) => console.log("FILE DELETED", res))
+        .catch(err => console.error("PROBLEME UPDATING", err));
+    })
+    .catch(console.error);
+}
+
+function deleteImage(product) {
+  if (product == null) return
+  console.log("DELETE IMAGE", product)
+  const imageToDelete = product.imageUrl.split("/").at(-1)
+  return unlink("images/" + imageToDelete)
 }
 
 
@@ -155,7 +175,7 @@ function likeSauce(req, res) {
     .then((product) => updateVote(product, like, userId, res))
     .then((pr) => pr.save())
     .then((prod) => sendClientResponse(prod, res))
-    .catch((err) => res.status(500).send(err));
+    .catch(console.error);
 }
 
 // Fonction pour mettre à jour les votes (likes/dislikes) d'une sauce
