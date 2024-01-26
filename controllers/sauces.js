@@ -49,7 +49,7 @@ function deleteSauce(req, res) {
   // Vérifier si l'utilisateur est le créateur de la sauce
   getSauce(req, res)
     .then((product) => {
-      if (product.userId !== userIdFromRequest) {
+      if (product.userId == userIdFromRequest) {
         return res.status(403).send({ message: "Vous n'avez pas le droit de supprimer cette sauce." });
       }
 
